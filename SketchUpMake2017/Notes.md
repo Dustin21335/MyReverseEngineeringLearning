@@ -2,14 +2,14 @@ I noticed that some tools were disabled and marked **(Pro Only)**. I searched th
 
 That led me to the function at `0x1407378f0`, which looks like the function used to start the intersect tool. The function first calls `0x1405fcf50`, and if it returns `false`, it calls `rb_raise` with the **"intersect is a Pro only feature"** error.
 
-```text
+```c
 14073792e    if (sub_1405fcf50() == 0)
 140737941        rb_raise(*rb_eArgError, "'intersect' is a Pro only feature.")
 ```
 
-After following the call to `0x1405fcf50`, I found that it checks a pointer at `0x1411ce500`. If the pointer exists, it jumps through its vtable at `+0x8`; otherwise, it falls back to returning `0`.
+After following the call to `0x1405fcf50`, I found that it checks a pointer at `0x1411ce500`. If the pointer exists, it jumps through its vtable at `+0x8`; otherwise, it falls back to returning `false`.
 
-```text
+```c
 1405fcf50    int64_t sub_1405fcf50()
 
 1405fcf50        int64_t* rcx = data_1411ce500
@@ -26,7 +26,7 @@ This appears to be the `IsPro` check.
 
 I patched the check so that it always returns `true`. Woohoo, now we have the Pro only tools. 
 
-```text
+```c
 1405fcf50    int64_t sub_1405fcf50()
 
 1405fcf57        return 1
